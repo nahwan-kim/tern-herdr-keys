@@ -1,0 +1,7 @@
+schema = 1
+id = "herdr-keys"
+name = "Herdr Keys"
+version = "0.1.0"
+description = "herdr-style spaces: ⌘⇧1…9 shows the Nth session, ⌘W closes block → tab → session, and each host's default session stays first."
+icon = "keyboard"
+window = "window.luau"
