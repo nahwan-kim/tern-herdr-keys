@@ -2,8 +2,9 @@
 -- herdr-style spaces for Tern. A herdr space is a Tern session:
 --   ⌘⇧1…⌘⇧9  shows the Nth session in the tab list's order;
 --   ⌘W        closes the focused block (Tern's close_pane, taken over here); a tab's last block
---             takes the tab with it (Tern does that), and a session's last block takes the
---             session with it, unless blocks are parked there or it is its host's only session;
+--             takes the tab with it (Tern does that) and a session's last block leaves it empty;
+--             on an empty session it closes the session, unless blocks are parked there or it
+--             is its host's only session;
 --   ⌘⇧W       closes the current session, never a default one;
 --   pinning   each host's default session (kept in tern.kv by name and id, so a rename keeps
 --             it) stays first among that host's sessions, and neither close ends it.
@@ -212,11 +213,12 @@ for n = 1, 9 do
 	})
 end
 
--- ⌘W, the palette's Close block and a block's close button: the session's last block ends the
--- session instead, through Tern's own command so the close confirmation and session locks still
--- apply. It stays a block close when the session has parked blocks (a parked pane has no tab, so
--- any parked block on this host counts), when it is the host's only session, or when it is the
--- host's default, which only empties.
+-- ⌘W, the palette's Close block and a block's close button: on a session with no blocks left it
+-- ends the session instead, through Tern's own command so the close confirmation and session
+-- locks still apply. The session's last block only empties it, so a second ⌘W is what ends it.
+-- An empty session stays when it has parked blocks (a parked pane has no tab, so any parked
+-- block on this host counts), when it is the host's only session, or when it is the host's
+-- default.
 tern.override("close_pane", function(cx: WindowCx): boolean?
 	if MOBILE then
 		return false
@@ -240,7 +242,7 @@ tern.override("close_pane", function(cx: WindowCx): boolean?
 		end
 	end
 	local default = is_default(cx, cur)
-	if blocks <= 1 and not parked and #sessions_on(cx, cur.host) > 1 and not default then
+	if blocks == 0 and not parked and #sessions_on(cx, cur.host) > 1 and not default then
 		cx:command("close_session")
 	elseif cx.session:focused() then
 		cx:command("close_pane")
